@@ -4,3 +4,6 @@ Created using JavaScript, Node.js, MongoDB + Mongoose, Express, CSS, html, ejs
 
 
 https://stormy-gorge-10384.herokuapp.com/
+
+
+![Design preview for the todolist web app](./todolist web app preview.png)
