@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const _ = require("lodash")
+const moment = require("moment")
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
+// mongoose.connect("mongodb://localhost:27017/todolistDB",{useNewUrlParser: true, useUnifiedTopology: true})
 mongoose.connect("mongodb+srv://test123:test123@cluster0.rrwwt.mongodb.net/todolistDB", {useNewUrlParser: true, useUnifiedTopology: true})
 
 const itemsSchema = new mongoose.Schema({
@@ -31,7 +33,7 @@ const listSchema = {
 
 const List = mongoose.model("List", listSchema)
 
-const day = date.getDate();
+const day = moment().format("dddd, MMMM Do")
 
 app.get("/", function(req, res) {
   
@@ -114,6 +116,23 @@ app.post("/delete", function(req, res){
       }
     })
   }
+});
+
+app.post("/deleteList", function(req, res){
+  
+  const listID = req.body.listID
+  console.log(listID)
+
+  List.findOneAndRemove({_id: listID}, function(err){
+    if (err){
+      console.log(err)
+    } else {
+      console.log("successfully removed list")
+      res.redirect("/")
+    }
+  })
+
+  
 });
 
 

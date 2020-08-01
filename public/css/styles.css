@@ -6,11 +6,23 @@ body {
 }
 
 .navbar {
-  padding: 0.5rem 4rem;
+  padding: 0.5rem 6rem;
 }
 
 .nav-item {
   padding: 5px;
+}
+
+.deleteList {
+  float: right;
+  margin-right: 10px;
+  background-color:white;
+  border: none;
+}
+
+.deleteList:hover {
+  transform: scale(1.2);
+
 }
 
 h1 {
@@ -29,6 +41,10 @@ h1 {
 #heading {
   background-color: #A683E3;
   text-align: center;
+}
+
+.listTitle {
+  display: flex;
 }
 
 .item {
