@@ -1,21 +1,36 @@
 //jshint esversion:6
-
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const _ = require("lodash")
 const moment = require("moment")
+const session = require('express-session');
+const passport = require("passport");
+const passportLocalMongoose = require("passport-local-mongoose");
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy
+const findOrCreate = require('mongoose-findorcreate');
 
 const app = express();
 
-app.set('view engine', 'ejs');
-
+app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-// mongoose.connect("mongodb://localhost:27017/todolistDB",{useNewUrlParser: true, useUnifiedTopology: true})
-mongoose.connect("mongodb+srv://test123:test123@cluster0.rrwwt.mongodb.net/todolistDB", {useNewUrlParser: true, useUnifiedTopology: true})
+app.use(session({
+  secret: "Our little secret.",
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+mongoose.connect("mongodb://localhost:27017/todolistDB",{useNewUrlParser: true, useUnifiedTopology: true})
+// mongoose.connect("mongodb+srv://test123:test123@cluster0.rrwwt.mongodb.net/todolistDB", {useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.set("useCreateIndex", true)
 
 const itemsSchema = new mongoose.Schema({
   name: {
@@ -33,17 +48,187 @@ const listSchema = {
 
 const List = mongoose.model("List", listSchema)
 
-const day = moment().format("dddd, MMMM Do")
+const userSchema = new mongoose.Schema({
+  username: { type: String, unique: true }, 
+  email: String,
+  password: String,
+  provider: String,
+  lists: [listSchema],
+  items: [itemsSchema]
 
-app.get("/", function(req, res) {
+})
+userSchema.plugin(passportLocalMongoose,{
+  usernameField: "username"
+})
+userSchema.plugin(findOrCreate)
+const User = new mongoose.model("User", userSchema)
+
+passport.use(User.createStrategy())
+
+passport.serializeUser(function(user, done) {
+done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+ User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+
+var currentProfile;
+
+////////////////////////// google strat //////////////////////////////////////
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/todolist",
+    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    currentProfile = profile
+    console.log(currentProfile)
+    User.findOrCreate({ username: profile.id },        
+      {
+        provider: "google",
+        email: profile._json.email
+      }, 
+      function (err, user) {
+        return cb(err, user)
+    });
+  }
+));
+
+////////////////////////// facebook strat //////////////////////////////////////
+
+passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: "http://localhost:3000/auth/facebook/todolist"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    currentProfile = profile
+    console.log(currentProfile)
+    User.findOrCreate({ username: profile.id },
+      {
+        provider: "facebook",
+        email: profile._json.email
+      }, 
+      function (err, user) {
+        return cb(err, user);
+    });
+  }
+));
+
+////////////////////////// auth routes //////////////////////////////////////
+
+
+app.get("/auth/google",
+  passport.authenticate("google", {scope: ["profile", "email"]}))
+
+app.get("/auth/google/todolist",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  function(req, res) {
+    // Successful authentication, redirect to secrets.
+    res.redirect("/today");
+  });
+
+app.get('/auth/facebook',
+  passport.authenticate('facebook', {scope: ["email"]}));
+
+app.get('/auth/facebook/todolist',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect to secrets.
+    res.redirect('/today');
+  });
+
+////////////////// main routes //////////////////////////////////
+
+app.get("/", function(req, res){
+  res.render("home")
+})
+
+app.route("/login")
+  .get(function(req, res){
+    res.render("login")
+  })
+  .post(function(req, res){
+    const user = new User({
+        username: req.body.username,
+        password: req.body.password
+    })
   
-  List.find({}, function(err, otherLists){
-    Item.find({}, function(err, results){
-        res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists});
+    req.login(user, function(err){
+        if (err) {
+            console.log(err)
+        } else {
+            passport.authenticate("local", { failureRedirect: '/register' })(req, res, function(){
+                res.redirect("/today")
+            })
+        }
     })
   })
-  
-});
+
+app.get("/logout", function(req, res){
+  req.logout()
+  res.redirect("/")
+})
+
+app.route("/register")
+  .get(function(req, res){
+    res.render("register")
+  })
+  .post(function(req, res){
+    const username = req.body.username;
+    const password = req.body.password;
+
+    User.register({username: username}, password, function(err, user){
+        if (err) {
+            console.log(err)
+            res.redirect("/register")
+        } else {
+          passport.authenticate('local')(req, res, () => {
+            User.updateOne(
+              { _id: user._id },
+              { $set: { provider: "local", email: username } },
+              () => res.redirect('/today')
+            )
+          })
+        }
+    })
+  })
+
+app.route("/today") 
+  .get(function(req, res) {
+    const day = moment().format("dddd, MMMM Do")
+
+    List.find({}, function(err, otherLists){
+      Item.find({}, function(err, results){
+          res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists});
+      })
+    })
+  })
+  .post(function(req, res) {
+    const listName = req.body.list
+    const itemName = req.body.newItem
+
+    const item = new Item({
+      name: itemName
+    })
+
+    if (listName === day) {
+      item.save()
+      res.redirect("/today");
+    } else {
+      List.findOne({name: listName}, function(err, foundList){
+        foundList.items.push(item)
+        foundList.save()
+        res.redirect("/" + listName)
+      })
+    }
+  });
 
 app.get("/:customListName", function(req, res){
   const customListName = _.capitalize(req.params.customListName) 
@@ -65,29 +250,7 @@ app.get("/:customListName", function(req, res){
       } 
     })
   })
-
-  console.log(req.params.customListName)
 })
-
-app.post("/", function(req, res){
-  const listName = req.body.list
-  const itemName = req.body.newItem
-
-  const item = new Item({
-    name: itemName
-  })
-
-  if (listName === day) {
-    item.save()
-    res.redirect("/");
-  } else {
-    List.findOne({name: listName}, function(err, foundList){
-      foundList.items.push(item)
-      foundList.save()
-      res.redirect("/" + listName)
-    })
-  }
-});
 
 app.post("/newList", function(req, res){
   const newListTitle = req.body.newListTitle
@@ -108,7 +271,7 @@ app.post("/delete", function(req, res){
         console.log("successfully removed")
       }
     })
-    res.redirect("/")
+    res.redirect("/today")
   } else {
     List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: id}}}, function(err, foundList){
       if (!err) {
@@ -121,20 +284,16 @@ app.post("/delete", function(req, res){
 app.post("/deleteList", function(req, res){
   
   const listID = req.body.listID
-  console.log(listID)
 
   List.findOneAndRemove({_id: listID}, function(err){
     if (err){
       console.log(err)
     } else {
       console.log("successfully removed list")
-      res.redirect("/")
+      res.redirect("/today")
     }
-  })
-
-  
+  })  
 });
-
 
 let port = process.env.PORT;
 if (port == null || port == "") {
