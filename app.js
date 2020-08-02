@@ -90,7 +90,7 @@ const day = moment().format("dddd, MMMM Do")
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/todolist",
+    callbackURL: "https://stormy-gorge-10384.herokuapp.com/auth/google/todolist",
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
   },
   function(accessToken, refreshToken, profile, cb) {
