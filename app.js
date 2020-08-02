@@ -229,11 +229,14 @@ app.route("/register")
 
 app.route("/today") 
   .get(function(req, res) {
-    List.find({username: currUsername}, function(err, otherLists){
-      Item.find({username: currUsername}, function(err, results){
-          res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists});
+    User.find({username: currUsername}, function(err, currUser){
+      List.find({username: currUsername}, function(err, otherLists){
+        Item.find({username: currUsername}, function(err, results){
+            res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists, currUser: currUser });
+        })
       })
     })
+    
     
   })
   .post(function(req, res) {
@@ -259,24 +262,27 @@ app.route("/today")
 app.get("/:customListName", function(req, res){
   const customListName = _.capitalize(req.params.customListName) 
 
-  List.find({username: currUsername}, function(err, otherLists){
-    List.findOne({username: currUsername, name: customListName}, function(err, foundList){
-      if (!err) {
-        if (!foundList) {
-          //create a new list
-          const list = new List({
-            name: customListName,
-            username: currUsername
-          })
-          list.save();
-          res.redirect("/" + customListName)
-        } else {
-          //show an existing list
-          res.render("list", {listTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists})
-        }
-      } 
+  User.find({username: currUsername}, function(err, currUser){
+    List.find({username: currUsername}, function(err, otherLists){
+      List.findOne({username: currUsername, name: customListName}, function(err, foundList){
+        if (!err) {
+          if (!foundList) {
+            //create a new list
+            const list = new List({
+              name: customListName,
+              username: currUsername
+            })
+            list.save();
+            res.redirect("/" + customListName)
+          } else {
+            //show an existing list
+            res.render("list", {listTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser})
+          }
+        } 
+      })
     })
   })
+  
 })
 
 app.post("/newList", function(req, res){
