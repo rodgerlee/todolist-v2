@@ -28,8 +28,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect("mongodb://localhost:27017/todolistDB",{useNewUrlParser: true, useUnifiedTopology: true})
-// mongoose.connect("mongodb+srv://test123:test123@cluster0.rrwwt.mongodb.net/todolistDB", {useNewUrlParser: true, useUnifiedTopology: true})
+// mongoose.connect("mongodb://localhost:27017/todolistDB",{useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect("mongodb+srv://test123:test123@cluster0.rrwwt.mongodb.net/todolistDB", {useNewUrlParser: true, useUnifiedTopology: true})
 mongoose.set("useCreateIndex", true)
 
 const itemsSchema = new mongoose.Schema({
