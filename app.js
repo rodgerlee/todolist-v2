@@ -178,6 +178,7 @@ app.route("/login")
       } else {
         currentProfile = user
         currUsername = currentProfile.username
+        console.log(currUsername)
         passport.authenticate("local")(req, res, function(err){
           if (err) {
             console.log(err)
@@ -229,10 +230,11 @@ app.route("/register")
 
 app.route("/today") 
   .get(function(req, res) {
+    console.log(currUsername)
     User.find({username: currUsername}, function(err, currUser){
       List.find({username: currUsername}, function(err, otherLists){
         Item.find({username: currUsername}, function(err, results){
-            res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists, currUser: currUser });
+            res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists, currUser: currUser[0] });
         })
       })
     })
