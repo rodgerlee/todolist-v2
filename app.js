@@ -54,8 +54,13 @@ const userSchema = new mongoose.Schema({
   username: { type: String, unique: true }, 
   email: String,
   password: String,
-  provider: String
+  provider: String,
+  name: String
 })
+
+var profileLocality = "local"
+var currentProfile
+var currUsername
 
 userSchema.plugin(passportLocalMongoose,{
   usernameField: "username"
@@ -77,9 +82,7 @@ passport.deserializeUser(function(id, done) {
 });
 
 
-var profileLocality = "local"
-var currentProfile
-var username
+
 const day = moment().format("dddd, MMMM Do")
 
 ////////////////////////// google strat //////////////////////////////////////
@@ -91,13 +94,15 @@ passport.use(new GoogleStrategy({
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
   },
   function(accessToken, refreshToken, profile, cb) {
-    profileLocality = "facebook"
+    profileLocality = "google"
     currentProfile = profile
-    username = currentProfile.id
+    currUsername = currentProfile.id
+
     User.findOrCreate({ username: profile.id },        
       {
         provider: "google",
-        email: profile._json.email
+        email: profile._json.email,
+        name: profile.displayName
       }, 
       function (err, user) {
         return cb(err, user)
@@ -113,13 +118,14 @@ passport.use(new FacebookStrategy({
     callbackURL: "http://localhost:3000/auth/facebook/todolist"
   },
   function(accessToken, refreshToken, profile, cb) {
-    profileLocality = "google"
+    profileLocality = "facebook"
     currentProfile = profile
-    username = currentProfile.id
+    currUsername = currentProfile.id
     User.findOrCreate({ username: profile.id },
       {
         provider: "facebook",
-        email: profile._json.email
+        email: profile._json.email,
+        name: profile.displayName
       }, 
       function (err, user) {
         return cb(err, user);
@@ -163,19 +169,23 @@ app.route("/login")
   .post(function(req, res){
     const user = new User({
         username: req.body.username,
+        email: req.body.username,
         password: req.body.password
     })
-  
     req.login(user, function(err){
-        if (err) {
+      if (err) {
+          console.log(err)
+      } else {
+        currentProfile = user
+        currUsername = currentProfile.username
+        passport.authenticate("local")(req, res, function(err){
+          if (err) {
             console.log(err)
-        } else {
-          currentProfile = user
-          username = currentProfile.username
-          passport.authenticate("local", { failureRedirect: '/register' })(req, res, function(){
-              res.redirect("/today")
-          })
-        }
+          }  else {
+            res.redirect("/today")
+          }
+        })
+      }
     })
   })
 
@@ -189,58 +199,56 @@ app.route("/register")
     res.render("register")
   })
   .post(function(req, res){
-    const username = req.body.username;
+    const username = req.body.email;
     const password = req.body.password;
-
-    User.register({username: username}, password, function(err, user){
-        if (err) {
-            console.log(err)
-            res.redirect("/register")
-        } else {
-          currentProfile = user
-          username = currentProfile.username
-          passport.authenticate('local')(req, res, () => {
-            User.updateOne(
-              { _id: user._id },
-              { $set: { provider: "local", email: username } },
-              () => res.redirect('/today')
-            )
-          })
-        }
+    const name = req.body.name;
+    User.register({username: username, email: username, name: name, provider: "local"}, password, function(err, user){
+      
+      if (err) {
+          console.log(err)
+          res.redirect("/register")
+      } else {
+        currentProfile = user
+        currUsername = currentProfile.email
+        console.log(currentProfile)
+        res.redirect('/today')
+        // passport.authenticate('local')(req, res, function(err) {
+        //   if (err){
+        //     console.log(err)
+        //   } else {
+        //     User.updateOne(
+        //       { _id: user._id },
+        //       { $set: { provider: "local", email: username, name: name } },
+        //       () => res.redirect('/today')
+        //     )
+        //   }
+        // })
+      }
     })
   })
 
 app.route("/today") 
   .get(function(req, res) {
-    if (profileLocality === "local"){
-      List.find({username: username}, function(err, otherLists){
-        Item.find({username: username}, function(err, results){
-            res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists});
-        })
+    List.find({username: currUsername}, function(err, otherLists){
+      Item.find({username: currUsername}, function(err, results){
+          res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists});
       })
-    } else {
-      List.find({username: username}, function(err, otherLists){
-        Item.find({username: username}, function(err, results){
-            res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists});
-        })
-      })
-    }
+    })
     
   })
   .post(function(req, res) {
     const listName = req.body.list
     const itemName = req.body.newItem
-
     const item = new Item({
       name: itemName,
-      username: username
+      username: currUsername
     })
 
     if (listName === day) {
       item.save()
-      res.redirect("/today");
+      res.redirect("/today")
     } else {
-      List.findOne({username: username, name: listName}, function(err, foundList){
+      List.findOne({username: currUsername, name: listName}, function(err, foundList){
         foundList.items.push(item)
         foundList.save()
         res.redirect("/" + listName)
@@ -251,14 +259,14 @@ app.route("/today")
 app.get("/:customListName", function(req, res){
   const customListName = _.capitalize(req.params.customListName) 
 
-  List.find({}, function(err, otherLists){
-    List.findOne({username: username, name: customListName}, function(err, foundList){
+  List.find({username: currUsername}, function(err, otherLists){
+    List.findOne({username: currUsername, name: customListName}, function(err, foundList){
       if (!err) {
         if (!foundList) {
           //create a new list
           const list = new List({
             name: customListName,
-            username: username
+            username: currUsername
           })
           list.save();
           res.redirect("/" + customListName)
@@ -292,7 +300,7 @@ app.post("/delete", function(req, res){
     })
     res.redirect("/today")
   } else {
-    List.findOneAndUpdate({username: username, name: listName}, {$pull: {items: {_id: id}}}, function(err, foundList){
+    List.findOneAndUpdate({username: currUsername, name: listName}, {$pull: {items: {_id: id}}}, function(err, foundList){
       if (!err) {
         res.redirect("/" + listName)
       }
@@ -304,7 +312,7 @@ app.post("/deleteList", function(req, res){
   
   const listID = req.body.listID
 
-  List.findOneAndRemove({username: username, _id: listID}, function(err){
+  List.findOneAndRemove({username: currUsername, _id: listID}, function(err){
     if (err){
       console.log(err)
     } else {
