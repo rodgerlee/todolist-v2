@@ -115,7 +115,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "http://stormy-gorge-10384.herokuapp.com//auth/facebook/todolist"
+    callbackURL: "https://stormy-gorge-10384.herokuapp.com//auth/facebook/todolist"
   },
   function(accessToken, refreshToken, profile, cb) {
     profileLocality = "facebook"
