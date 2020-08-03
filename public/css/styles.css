@@ -1,9 +1,18 @@
-body {
+.home-body {
+  background-color: #b9c5f5;
+  /* background-image: -webkit-linear-gradient(65deg, #A683E3 50%, #E4E9FD 50%); */
+  min-height: 1000px;
+  font-family: 'helvetica neue';
+}
+
+.gradient-body {
   background-color: #E4E9FD;
   background-image: -webkit-linear-gradient(65deg, #A683E3 50%, #E4E9FD 50%);
   min-height: 1000px;
   font-family: 'helvetica neue';
 }
+
+
 
 .navbar {
   padding: 0.5rem 3rem;
@@ -23,6 +32,25 @@ body {
 .deleteList:hover {
   transform: scale(1.2);
 
+}
+
+/* register card */
+.card-body.register {
+  padding: 0 0 0 10px;
+}
+
+.card {
+  margin: 0.25rem 0rem;
+}
+
+/* login error message */
+.button-row {
+  display: flex;
+}
+.err {
+  padding: 10px 0 0 25rem;
+  color: red;
+  font-size: large;
 }
 
 h1 {
@@ -113,8 +141,17 @@ input[type="text"]:focus {
   opacity: 1;
 }
 
+#page-container {
+  position: relative;
+  min-height: 100vh;
+}
+
 footer {
   color: white;
   color: rgba(0, 0, 0, 0.5);
   text-align: center;
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  height: 1rem;
 }

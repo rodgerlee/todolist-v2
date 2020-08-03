@@ -164,7 +164,7 @@ app.get("/", function(req, res){
 
 app.route("/login")
   .get(function(req, res){
-    res.render("login")
+    res.render("login", {errorMsg: ""})
   })
   .post(function(req, res){
     const user = new User({
@@ -172,23 +172,27 @@ app.route("/login")
         email: req.body.username,
         password: req.body.password
     })
-    req.login(user, function(err){
-      if (err) {
-          console.log(err)
-      } else {
-        currentProfile = user
-        currUsername = currentProfile.username
-        console.log(currUsername)
-        passport.authenticate("local")(req, res, function(err){
+    currentProfile = user
+    currUsername = currentProfile.username
+    User.findOne({username: currUsername}, function(err, foundUser){
+      if (foundUser){
+        passport.authenticate("local", {failureRedirect: "/loginFailure"})(req, res, function(err){
+          console.log(req)
           if (err) {
             console.log(err)
           }  else {
             res.redirect("/today")
           }
         })
+      } else {
+        res.render("login", {errorMsg: "Please register an account."})
       }
     })
   })
+
+app.get("/loginFailure", function(req, res){
+  res.render("login", {errorMsg: "Incorrect Password."})
+})
 
 app.get("/logout", function(req, res){
   req.logout()
@@ -213,17 +217,6 @@ app.route("/register")
         currUsername = currentProfile.email
         console.log(currentProfile)
         res.redirect('/today')
-        // passport.authenticate('local')(req, res, function(err) {
-        //   if (err){
-        //     console.log(err)
-        //   } else {
-        //     User.updateOne(
-        //       { _id: user._id },
-        //       { $set: { provider: "local", email: username, name: name } },
-        //       () => res.redirect('/today')
-        //     )
-        //   }
-        // })
       }
     })
   })
