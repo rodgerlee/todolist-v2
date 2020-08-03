@@ -3,7 +3,7 @@ A simple ToDoList, with add and remove task, add new list, and navigation bar fe
 Created using JavaScript, Node.js, MongoDB + Mongoose, Express, CSS, html, ejs
 
 
-https://stormy-gorge-10384.herokuapp.com/
+https://todolist-a-p-p.herokuapp.com/
 
 
 ![Design preview for the todolist web app](./img/todolist-preview.png)
