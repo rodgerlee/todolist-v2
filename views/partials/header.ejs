@@ -6,36 +6,26 @@
   <title>To Do List</title>
   <link rel="icon" href="favicon/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <!-- Scrollbar Custom CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
   <link rel="stylesheet" href="css/styles.css">
   <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
 
-  
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <p class="navbar-brand">TODOLIST</p>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+    <button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
+      <i class="fas fa-bars"></i>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <p class="navbar-brand">TODOLIST</p>
+    <a class="nav-link" href="/today">
+      <time class="icon">
+        <strong></strong>
+        <span><%= calendarNumber %></span>
+      </time>
+    </a>
+
+    <div class="navbar-right">
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/today">Today <span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Lists
-          </a>
-          <div class="dropdown-menu-right dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <% otherLists.forEach(function(item){ %>
-              <form action="/deleteList" method="POST">
-                <div class="listTitle"> 
-                  <a class="dropdown-item" href="/<%= item.name %>"><%= item.name %></a>
-                  <button class="deleteList" type="submit" name="listID" value="<%= item._id %>"><i class="far fa-trash-alt"></i></button>
-                </div>
-              </form>
-            <% }) %>
-          </div>
-        </li>
-        
+  
         <li class="nav-item">
           <!-- Button trigger modal -->
           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
@@ -62,8 +52,7 @@
                       <button type="submit" class="btn btn-primary"">Create</button>
                     </div>
                   </form>
-                </div>
-                
+                </div>    
               </div>
             </div>
           </div>

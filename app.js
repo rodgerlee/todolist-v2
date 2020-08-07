@@ -84,6 +84,7 @@ passport.deserializeUser(function(id, done) {
 
 
 const day = moment().format("dddd, MMMM Do")
+const calendarNumber = moment().format("L").slice(3,5)
 
 ////////////////////////// google strat //////////////////////////////////////
 
@@ -177,7 +178,6 @@ app.route("/login")
     User.findOne({username: currUsername}, function(err, foundUser){
       if (foundUser){
         passport.authenticate("local", {failureRedirect: "/loginFailure"})(req, res, function(err){
-          console.log(req)
           if (err) {
             console.log(err)
           }  else {
@@ -215,7 +215,6 @@ app.route("/register")
       } else {
         currentProfile = user
         currUsername = currentProfile.email
-        console.log(currentProfile)
         res.redirect('/today')
       }
     })
@@ -223,11 +222,10 @@ app.route("/register")
 
 app.route("/today") 
   .get(function(req, res) {
-    console.log(currUsername)
     User.find({username: currUsername}, function(err, currUser){
       List.find({username: currUsername}, function(err, otherLists){
         Item.find({username: currUsername}, function(err, results){
-            res.render("list", {listTitle: day, newListItems: results, otherLists: otherLists, currUser: currUser[0] });
+            res.render("list", {calendarNumber:calendarNumber, listTitle: day, newListItems: results, otherLists: otherLists, currUser: currUser[0] });
         })
       })
     })
@@ -271,7 +269,7 @@ app.get("/:customListName", function(req, res){
             res.redirect("/" + customListName)
           } else {
             //show an existing list
-            res.render("list", {listTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser[0]})
+            res.render("list", {calendarNumber:calendarNumber, listTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser[0]})
           }
         } 
       })

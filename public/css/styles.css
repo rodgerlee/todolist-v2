@@ -4,7 +4,6 @@
   background: transparent;
 }
 
-
 .home-body {
   background: rgb(185,197,245);
   background: linear-gradient(180deg, rgba(185,197,245,1) 0%, rgba(255,255,255,1) 100%);
@@ -17,28 +16,82 @@
   background-image: -webkit-linear-gradient(65deg, #A683E3 50%, #E4E9FD 50%);
   min-height: 1000px;
   font-family: 'helvetica neue';
+  display: flex;
+}
+/* header navbar */
+
+.navbar-nav {
+  flex-direction: row;
+  position: absolute;
+  top: 10px;
+  right: 30px;
 }
 
+.navbar-right {
+  display: flex;
+  flex-grow: 1;
+}
 
+.nav-link {
+  padding: 8px 0;
+}
+
+a {
+  color: black;
+}
 
 .navbar {
   padding: 0.5rem 3rem;
+  padding-left: 20px;
+  position: fixed;
+  z-index: 2;
+  width: 100%;
+}
+.btn:active,
+.btn:focus,
+.btn:focus:active {
+  background-image: none;
+  outline: 0;
+  box-shadow: none;
+}
+.btn-info {
+  background: #f8f9fa;
+  border-color: #f8f9fa;
+  color: black;
+  border: none;
+}
+.btn-info:hover {
+  background: #f8f9fa;
+  border-color: #f8f9fa;
+  color: black;
+}
+.fa-bars {
+  background: #f8f9fa;
 }
 
 .nav-item {
-  padding: 5px;
+  padding: 0 5px 0 5px;
+  color: black;
 }
 
 .deleteList {
   float: right;
   margin-right: 10px;
-  background-color:white;
+  background-color:#f5f8fa;
   border: none;
+  display: none;
 }
 
 .deleteList:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
+}
 
+.dropdown-item:hover + .deleteList, .deleteList:hover {
+  display: inline-block;
+}
+
+.modal-backdrop {
+  z-index: 1;
 }
 
 /* register card */
@@ -76,6 +129,10 @@ h1 {
 #heading {
   background-color: #A683E3;
   text-align: center;
+}
+
+small {
+  font-size: 35%;
 }
 
 .listTitle {
@@ -138,6 +195,7 @@ button.addItem {
   width: 313px;
 }
 
+
 input[type="text"]:focus {
   outline: none;
   box-shadow: inset 0 -3px 0 0 #A683E3;
@@ -161,4 +219,149 @@ footer {
   bottom: 10px;
   width: 100%;
   height: 1rem;
+}
+
+
+.wrapper {
+  display: flex;
+  width: 100%;
+}
+
+/* ---------------------------------------------------
+    SIDEBAR STYLE
+----------------------------------------------------- */
+/* sidebar */
+
+#sidebar {
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  margin-top: 60px;
+  z-index: 10;
+  background: rgb(245, 248, 250) ;
+  color: rgb(255, 240, 240);
+  transition: all 0.3s;
+}
+
+#sidebar.active {
+  margin-left: -250px;
+  color: white;
+  background: rgb(248, 241, 241);
+}
+#sidebar ul {
+  padding-top: 30px;
+  padding-left: 30px;
+}
+#sidebar .user-lists{
+  padding: 0;
+}
+
+#sidebar ul li a {
+  font-size: 1.1em;
+  display: block;
+}
+
+.dropdown-divider {
+  margin: 0 10px 0 0;
+  
+}
+
+a[data-toggle="collapse"] {
+  position: relative;
+}
+
+ul.CTAs {
+  padding: 20px;
+}
+
+ul.CTAs a {
+  text-align: center;
+  font-size: 0.9em !important;
+  display: block;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+/* content */
+#content {
+  width: calc(100% - 250px);
+  padding-top: 66px;
+  min-height: 100vh;
+  
+  transition: all 0.3s;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+#content.active {
+  width: 100%;
+}
+
+/* time icon */
+time.icon
+{
+  font-size: 4px; /* change icon size */
+  display: block;
+  position: relative;
+  width: 7em;
+  height: 7em;
+  background-color: #fff;
+  border-radius: 0.6em;
+  box-shadow: 0 1px 0 #bdbdbd, 0 0 0 1px #bdbdbd;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: rotate(0deg) skewY(0deg);
+  -webkit-transform-origin: 50% 10%;
+  transform-origin: 50% 10%;
+}
+
+time.icon *
+{
+  display: block;
+  width: 100%;
+  font-size: 1em;
+  font-weight: bold;
+  font-style: normal;
+  text-align: center;
+}
+
+time.icon strong
+{
+  position: absolute;
+  top: 0;
+  padding: 0.4em 0;
+  color: #fff;
+  background-color: #e4e9fd;
+  border-bottom: 1px dashed #e4e9fd;
+  box-shadow: 0 2px 0 #e4e9fd;
+}
+
+time.icon span
+{
+  width: 100%;
+  font-size: 4em;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  padding-top: 4px;
+}
+
+
+@media (max-width: 768px) {
+  #sidebar {
+      margin-left: -250px;
+  }
+  #sidebar.active {
+      margin-left: 0;
+  }
+  #content {
+      width: 100%;
+  }
+  #content.active {
+      width: calc(100% - 250px);
+  }
+  #sidebarCollapse span {
+      display: none;
+  }
 }

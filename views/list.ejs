@@ -1,34 +1,83 @@
 <%- include("partials/header") -%>
-<div id="page-container">
-  <div class="box" id="heading">
-    <h1> <%= listTitle %> </h1>
+<div class="wrapper" id="page-container">
+  <nav id="sidebar" >
+    <ul class="list-unstyled components">
+      <li class="nav-item">
+        <a class="nav-link" href="/today"><span class="sidebar-item-icon"><i class="fas fa-inbox"></i> </span>Inbox</a>
+      </li>
+
+      <li class="nav-item dropdown">
+
+        <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="nav-link dropdown-toggle" href="#" >
+          Lists
+        </a>
+        <ul class="collapse list-unstyled user-lists" id="pageSubmenu">
+          <li>
+            <% otherLists.forEach(function(item){ %>
+              <form action="/deleteList" method="POST">
+                <div class="listTitle"> 
+                  <a class="dropdown-item" href="/<%= item.name %>">
+                    <%= item.name %>
+                  </a>
+                  <button class="deleteList" type="submit" name="listID" value="<%= item._id %>"><i class="far fa-trash-alt"></i></button>
+                  
+                </div>
+              </form>
+            <% }) %>
+          </li>
+          
+        </ul>
+      </li>
+      <div class="dropdown-divider"></div>
+    </ul>
+
+  </nav>
+
+
+  <div id="content">
+    <div class="box" id="heading">
+      <h1> Today <small><%= listTitle %></small> </h1>
+    </div>
+  
+    <div class="box">
+      <% newListItems.forEach(function(item){ %>
+        <!-- its pretty important to create a form for the button, in order for it to execute a delete -->
+        <form action="/delete" method="POST">
+          <div class="item">
+            <!-- remember to include item id for the value, so we can find the specific item to delete -->
+            <input type="checkbox" name="checkbox" value="<%=item._id%>" onChange="this.form.submit()">
+            <p><%=  item.name  %></p>
+          </div>
+          <!-- use a hidden input to send the listName of our deleted item -->
+          <input type="hidden" name="listName" value="<%= listTitle %>">
+        </form>
+      <% }) %>
+  
+        <form class="item" action="/today" method="post">
+          <input type="text" class="newItemInput" name="newItem" placeholder="New Item" autocomplete="off">
+          <button class="addItem" type="submit"  name="list" value="<%= listTitle %>">+</button>
+        </form>
+    </div>
   </div>
-
-  <div class="box">
-    <% newListItems.forEach(function(item){ %>
-      <!-- its pretty important to create a form for the button, in order for it to execute a delete -->
-      <form action="/delete" method="POST">
-        <div class="item">
-          <!-- remember to include item id for the value, so we can find the specific item to delete -->
-          <input type="checkbox" name="checkbox" value="<%=item._id%>" onChange="this.form.submit()">
-          <p><%=  item.name  %></p>
-        </div>
-        <!-- use a hidden input to send the listName of our deleted item -->
-        <input type="hidden" name="listName" value="<%= listTitle %>">
-      </form>
-      
-
-    <% }) %>
-
-      <form class="item" action="/today" method="post">
-        <input type="text" class="newItemInput" name="newItem" placeholder="New Item" autocomplete="off">
-        <button class="addItem" type="submit"  name="list" value="<%= listTitle %>">+</button>
-      </form>
-  </div>
+  
 
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <!-- jQuery Custom Scroller CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+        $("#sidebar").mCustomScrollbar({
+            theme: "minimal"
+        });
 
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar, #content').toggleClass('active');
+            $('.collapse.in').toggleClass('in');
+            $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+        });
+    });
+  </script>
   
 <%- include("partials/footer") -%>
