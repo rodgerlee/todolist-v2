@@ -228,9 +228,9 @@ app.route("/today")
         Item.find({username: currUsername, date: day}, function(err, todayResults){
           Item.find({username: currUsername, date: {$ne: day}}, function(err, overdueResults){
             if (overdueResults.length !== 0) {
-              res.render("list", {calendarNumber:calendarNumber, mainTitle:"Today", listTitle: day, overdue: "Overdue", oldListItems: overdueResults, today: "Today", newListItems: todayResults, otherLists: otherLists, currUser: currUser[0] });
+              res.render("list", {calendarNumber:calendarNumber, mainTitle:"Today", listTitle: day, subheader: day, overdue: "Overdue", oldListItems: overdueResults, today: "Today", newListItems: todayResults, otherLists: otherLists, currUser: currUser[0] });
             } else {
-              res.render("list", {calendarNumber:calendarNumber, mainTitle:"Today", listTitle: day, overdue: "", oldListItems: overdueResults, today: "",newListItems: todayResults, otherLists: otherLists, currUser: currUser[0] });
+              res.render("list", {calendarNumber:calendarNumber, mainTitle:"Today", listTitle: day, subheader: day, overdue: "", oldListItems: overdueResults, today: "",newListItems: todayResults, otherLists: otherLists, currUser: currUser[0] });
             }
           })  
         })
@@ -253,6 +253,7 @@ app.route("/today")
       res.redirect("/today")
     } else {
       List.findOne({username: currUsername, name: listName}, function(err, foundList){
+        console.log(listName)
         foundList.items.push(item)
         foundList.save()
         res.redirect("/" + listName)
@@ -278,7 +279,7 @@ app.get("/:customListName", function(req, res){
           } else {
             //show an existing list
             const empty = []
-            res.render("list", {calendarNumber:calendarNumber, oldListItems: empty, overdue: "", today: "", listTitle: "",mainTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser[0]})
+            res.render("list", {calendarNumber:calendarNumber, oldListItems: empty, overdue: "", today: "", subheader: "", listTitle: foundList.name ,mainTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser[0]})
           }
         } 
       })

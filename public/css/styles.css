@@ -304,11 +304,7 @@ footer {
 }
 #sidebar .user-lists{
   padding: 0;
-}
-
-#sidebar ul li a {
-  font-size: 1.1em;
-  display: block;
+  width: 180px;
 }
 
 .dropdown-divider {
