@@ -277,7 +277,8 @@ app.get("/:customListName", function(req, res){
             res.redirect("/" + customListName)
           } else {
             //show an existing list
-            res.render("list", {calendarNumber:calendarNumber, listTitle: "",mainTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser[0]})
+            const empty = []
+            res.render("list", {calendarNumber:calendarNumber, oldListItems: empty, overdue: "", today: "", listTitle: "",mainTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser[0]})
           }
         } 
       })
