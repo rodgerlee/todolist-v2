@@ -37,7 +37,8 @@ const itemsSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  username: String
+  username: String,
+  date: String
 })
 
 const Item = mongoose.model("Item", itemsSchema)
@@ -224,8 +225,14 @@ app.route("/today")
   .get(function(req, res) {
     User.find({username: currUsername}, function(err, currUser){
       List.find({username: currUsername}, function(err, otherLists){
-        Item.find({username: currUsername}, function(err, results){
-            res.render("list", {calendarNumber:calendarNumber, listTitle: day, newListItems: results, otherLists: otherLists, currUser: currUser[0] });
+        Item.find({username: currUsername, date: day}, function(err, todayResults){
+          Item.find({username: currUsername, date: {$ne: day}}, function(err, overdueResults){
+            if (overdueResults.length !== 0) {
+              res.render("list", {calendarNumber:calendarNumber, mainTitle:"Today", listTitle: day, overdue: "Overdue", oldListItems: overdueResults, today: "Today", newListItems: todayResults, otherLists: otherLists, currUser: currUser[0] });
+            } else {
+              res.render("list", {calendarNumber:calendarNumber, mainTitle:"Today", listTitle: day, overdue: "", oldListItems: overdueResults, today: "",newListItems: todayResults, otherLists: otherLists, currUser: currUser[0] });
+            }
+          })  
         })
       })
     })
@@ -237,7 +244,8 @@ app.route("/today")
     const itemName = req.body.newItem
     const item = new Item({
       name: itemName,
-      username: currUsername
+      username: currUsername,
+      date: day
     })
 
     if (listName === day) {
@@ -269,7 +277,7 @@ app.get("/:customListName", function(req, res){
             res.redirect("/" + customListName)
           } else {
             //show an existing list
-            res.render("list", {calendarNumber:calendarNumber, listTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser[0]})
+            res.render("list", {calendarNumber:calendarNumber, listTitle: "",mainTitle: foundList.name, newListItems: foundList.items, otherLists: otherLists, currUser: currUser[0]})
           }
         } 
       })

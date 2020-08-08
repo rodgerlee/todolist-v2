@@ -36,28 +36,66 @@
 
   <div id="content">
     <div class="box" id="heading">
-      <h1> Today <small><%= listTitle %></small> </h1>
+      <h1> <%= mainTitle %> <small><%= listTitle %></small> </h1>
     </div>
-  
-    <div class="box">
-      <% newListItems.forEach(function(item){ %>
-        <!-- its pretty important to create a form for the button, in order for it to execute a delete -->
-        <form action="/delete" method="POST">
-          <div class="item">
-            <!-- remember to include item id for the value, so we can find the specific item to delete -->
-            <input type="checkbox" name="checkbox" value="<%=item._id%>" onChange="this.form.submit()">
-            <p><%=  item.name  %></p>
-          </div>
-          <!-- use a hidden input to send the listName of our deleted item -->
-          <input type="hidden" name="listName" value="<%= listTitle %>">
-        </form>
-      <% }) %>
-  
-        <form class="item" action="/today" method="post">
-          <input type="text" class="newItemInput" name="newItem" placeholder="New Item" autocomplete="off">
-          <button class="addItem" type="submit"  name="list" value="<%= listTitle %>">+</button>
-        </form>
+
+    <div class="content-wrapper">
+      <div class="box subheading">
+        <h4> <%= overdue %> </h4>
+      </div>
+      <div class="box task-list">
+        <% oldListItems.forEach(function(item){ %>
+          <!-- its pretty important to create a form for the button, in order for it to execute a delete -->
+          <form action="/delete" method="POST">
+            <div class="item">
+              <!-- remember to include item id for the value, so we can find the specific item to delete -->
+              <input type="checkbox" name="checkbox" value="<%=item._id%>" onChange="this.form.submit()">
+              <div class="task-list-item-content">
+                <p><%=  item.name  %></p>
+                <div class="task-list-item-tag">
+                  <button class="due-date">
+                    <i class="fas fa-calendar-day"></i>
+                    <span><%= item.date %></span>
+                  </button>
+                </div>
+              </div>
+              
+            </div>
+            <!-- use a hidden input to send the listName of our deleted item -->
+            <input type="hidden" name="listName" value="<%= listTitle %>">
+          </form>
+        <% }) %>
+      </div>
     </div>
+    
+    <div class="content-wrapper">
+      <div class="box subheading">
+        <h4> <%= today %> </h4>
+      </div>
+      <div class="box task-list">
+        <% newListItems.forEach(function(item){ %>
+          <!-- its pretty important to create a form for the button, in order for it to execute a delete -->
+          <form action="/delete" method="POST">
+            <div class="item">
+              <!-- remember to include item id for the value, so we can find the specific item to delete -->
+              <input type="checkbox" name="checkbox" value="<%=item._id%>" onChange="this.form.submit()">
+              <div class="task-list-item-content">
+                <p><%=  item.name  %></p>
+              </div>
+              
+            </div>
+            <!-- use a hidden input to send the listName of our deleted item -->
+            <input type="hidden" name="listName" value="<%= listTitle %>">
+          </form>
+        <% }) %>
+    
+          <form class="item" action="/today" method="post">
+            <input type="text" class="newItemInput" name="newItem" placeholder="New Item" autocomplete="off">
+            <button class="addItem" type="submit"  name="list" value="<%= listTitle %>">+</button>
+          </form>
+      </div>
+    </div>
+    
   </div>
   
 
