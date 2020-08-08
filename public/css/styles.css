@@ -286,7 +286,7 @@ footer {
   top: 0;
   left: 0;
   height: 100vh;
-  margin-top: 60px;
+  margin-top: 56px;
   z-index: 10;
   background: rgb(245, 248, 250) ;
   color: rgb(255, 240, 240);
@@ -304,7 +304,9 @@ footer {
 }
 #sidebar .user-lists{
   padding: 0;
-  width: 180px;
+  max-width: 180px;
+  margin-left: 5px;
+  overflow: auto;
 }
 
 .dropdown-divider {
